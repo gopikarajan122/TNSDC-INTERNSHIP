@@ -1,115 +1,91 @@
-export interface NavigateOptions {
-    ignoreBlocker?: boolean;
-}
-type SubscriberHistoryAction = {
-    type: Exclude<HistoryAction, 'GO'>;
-} | {
-    type: 'GO';
-    index: number;
-};
-type SubscriberArgs = {
-    location: HistoryLocation;
-    action: SubscriberHistoryAction;
-};
-export interface RouterHistory {
-    location: HistoryLocation;
-    length: number;
-    subscribers: Set<(opts: SubscriberArgs) => void>;
-    subscribe: (cb: (opts: SubscriberArgs) => void) => () => void;
-    push: (path: string, state?: any, navigateOpts?: NavigateOptions) => void;
-    replace: (path: string, state?: any, navigateOpts?: NavigateOptions) => void;
-    go: (index: number, navigateOpts?: NavigateOptions) => void;
-    back: (navigateOpts?: NavigateOptions) => void;
-    forward: (navigateOpts?: NavigateOptions) => void;
-    canGoBack: () => boolean;
-    createHref: (href: string) => string;
-    block: (blocker: NavigationBlocker) => () => void;
-    flush: () => void;
-    destroy: () => void;
-    notify: (action: SubscriberHistoryAction) => void;
-    _ignoreSubscribers?: boolean;
-}
-export interface HistoryLocation extends ParsedPath {
-    state: ParsedHistoryState;
-}
-export interface ParsedPath {
-    href: string;
-    pathname: string;
-    search: string;
-    hash: string;
-}
-export interface HistoryState {
-}
-export type ParsedHistoryState = HistoryState & {
-    key?: string;
-    __TSR_key?: string;
-    __TSR_index: number;
-};
-type ShouldAllowNavigation = any;
-export type HistoryAction = 'PUSH' | 'REPLACE' | 'FORWARD' | 'BACK' | 'GO';
-export type BlockerFnArgs = {
-    currentLocation: HistoryLocation;
-    nextLocation: HistoryLocation;
-    action: HistoryAction;
-};
-export type BlockerFn = (args: BlockerFnArgs) => Promise<ShouldAllowNavigation> | ShouldAllowNavigation;
-export type NavigationBlocker = {
-    blockerFn: BlockerFn;
-    enableBeforeUnload?: (() => boolean) | boolean;
-};
-export declare function createHistory(opts: {
-    getLocation: () => HistoryLocation;
-    getLength: () => number;
-    pushState: (path: string, state: any) => void;
-    replaceState: (path: string, state: any) => void;
-    go: (n: number) => void;
-    back: (ignoreBlocker: boolean) => void;
-    forward: (ignoreBlocker: boolean) => void;
-    createHref: (path: string) => string;
-    flush?: () => void;
-    destroy?: () => void;
-    onBlocked?: () => void;
-    getBlockers?: () => Array<NavigationBlocker>;
-    setBlockers?: (blockers: Array<NavigationBlocker>) => void;
-    notifyOnIndexChange?: boolean;
-}): RouterHistory;
 /**
- * Creates a history object that can be used to interact with the browser's
- * navigation. This is a lightweight API wrapping the browser's native methods.
- * It is designed to work with TanStack Router, but could be used as a standalone API as well.
- * IMPORTANT: This API implements history throttling via a microtask to prevent
- * excessive calls to the history API. In some browsers, calling history.pushState or
- * history.replaceState in quick succession can cause the browser to ignore subsequent
- * calls. This API smooths out those differences and ensures that your application
- * state will *eventually* match the browser state. In most cases, this is not a problem,
- * but if you need to ensure that the browser state is up to date, you can use the
- * `history.flush` method to immediately flush all pending state changes to the browser URL.
- * @param opts
- * @param opts.getHref A function that returns the current href (path + search + hash)
- * @param opts.createHref A function that takes a path and returns a href (path + search + hash)
- * @returns A history instance
+ * Generate secure URL-friendly unique ID.
+ *
+ * By default, the ID will have 21 symbols to have a collision probability
+ * similar to UUID v4.
+ *
+ * ```js
+ * import { nanoid } from 'nanoid'
+ * model.id = nanoid() //=> "Uakgb_J5m9g-0JDMbcJqL"
+ * ```
+ *
+ * @param size Size of the ID. The default size is 21.
+ * @returns A random string.
  */
-export declare function createBrowserHistory(opts?: {
-    parseLocation?: () => HistoryLocation;
-    createHref?: (path: string) => string;
-    window?: any;
-}): RouterHistory;
+export function nanoid(size?: number): string
+
 /**
- * Create a hash-based history implementation.
- * Useful for static hosts or environments without server URL rewriting.
- * @link https://tanstack.com/router/latest/docs/framework/react/guide/history-types
+ * Generate secure unique ID with custom alphabet.
+ *
+ * Alphabet must contain 256 symbols or less. Otherwise, the generator
+ * will not be secure.
+ *
+ * @param alphabet Alphabet used to generate the ID.
+ * @param defaultSize Size of the ID. The default size is 21.
+ * @returns A random string generator.
+ *
+ * ```js
+ * const { customAlphabet } = require('nanoid')
+ * const nanoid = customAlphabet('0123456789абвгдеё', 5)
+ * nanoid() //=> "8ё56а"
+ * ```
  */
-export declare function createHashHistory(opts?: {
-    window?: any;
-}): RouterHistory;
+export function customAlphabet(
+  alphabet: string,
+  defaultSize?: number
+): (size?: number) => string
+
 /**
- * Create an in-memory history implementation.
- * Ideal for server rendering, tests, and non-DOM environments.
- * @link https://tanstack.com/router/latest/docs/framework/react/guide/history-types
+ * Generate unique ID with custom random generator and alphabet.
+ *
+ * Alphabet must contain 256 symbols or less. Otherwise, the generator
+ * will not be secure.
+ *
+ * ```js
+ * import { customRandom } from 'nanoid/format'
+ *
+ * const nanoid = customRandom('abcdef', 5, size => {
+ *   const random = []
+ *   for (let i = 0; i < size; i++) {
+ *     random.push(randomByte())
+ *   }
+ *   return random
+ * })
+ *
+ * nanoid() //=> "fbaef"
+ * ```
+ *
+ * @param alphabet Alphabet used to generate a random string.
+ * @param size Size of the random string.
+ * @param random A random bytes generator.
+ * @returns A random string generator.
  */
-export declare function createMemoryHistory(opts?: {
-    initialEntries: Array<string>;
-    initialIndex?: number;
-}): RouterHistory;
-export declare function parseHref(href: string, state: ParsedHistoryState | undefined): HistoryLocation;
-export {};
+export function customRandom(
+  alphabet: string,
+  size: number,
+  random: (bytes: number) => Uint8Array
+): () => string
+
+/**
+ * URL safe symbols.
+ *
+ * ```js
+ * import { urlAlphabet } from 'nanoid'
+ * const nanoid = customAlphabet(urlAlphabet, 10)
+ * nanoid() //=> "Uakgb_J5m9"
+ * ```
+ */
+export const urlAlphabet: string
+
+/**
+ * Generate an array of random bytes collected from hardware noise.
+ *
+ * ```js
+ * import { customRandom, random } from 'nanoid'
+ * const nanoid = customRandom("abcdef", 5, random)
+ * ```
+ *
+ * @param bytes Size of the array.
+ * @returns An array of random bytes.
+ */
+export function random(bytes: number): Uint8Array
