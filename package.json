@@ -1,25 +1,26 @@
 {
-  "name": "",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vite",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "@oxc-project/types",
+  "version": "0.133.0",
+  "description": "Types for Oxc AST nodes",
+  "keywords": [
+    "AST",
+    "Parser"
+  ],
+  "homepage": "https://oxc.rs",
+  "bugs": "https://github.com/oxc-project/oxc/issues",
+  "license": "MIT",
+  "author": "Boshen and oxc contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oxc-project/oxc.git",
+    "directory": "npm/oxc-types"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "funding": {
+    "url": "https://github.com/sponsors/Boshen"
+  },
+  "files": [
+    "types.d.ts"
+  ],
   "type": "module",
-  "dependencies": {
-    "@tanstack/react-query": "^5.101.0",
-    "@tanstack/react-router": "^1.170.15",
-    "lucide-react": "^1.20.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.2",
-    "vite": "^8.0.16"
-  }
+  "types": "types.d.ts"
 }
